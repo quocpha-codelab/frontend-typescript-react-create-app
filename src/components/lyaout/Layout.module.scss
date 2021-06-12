@@ -1,0 +1,16 @@
+.header {
+  background-color: aqua;
+  position: sticky;
+  top: 0;
+}
+
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  display: flex;
+  flex: 1;
+}
