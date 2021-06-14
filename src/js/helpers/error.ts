@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { message } from 'antd';
 
 export const getErrorMessage = (error: any): string => {

@@ -5,14 +5,14 @@ import styles from './styles.module.scss';
 
 import TaskList from 'js/components/task/TaskList';
 import AddTask from 'js/components/task/AddTask';
-import useGetAllTask from 'js/data/useGetAllTask';
+import useMyTasks from 'js/data/useMyTasks';
 
 const TASK_PER_PAGE = 10;
 
 const Tasks = () => {
   const [skip, setSkip] = useState<number>(0);
 
-  const { data, isFetching, refetch, isError } = useGetAllTask(skip, TASK_PER_PAGE);
+  const { data, isFetching, refetch, isError } = useMyTasks({ skip, take: TASK_PER_PAGE });
 
   const handlePageChange = (page: number): void => setSkip((page - 1) * TASK_PER_PAGE);
 
