@@ -1,4 +1,5 @@
-import { Table, Button, Tag } from 'antd';
+import { Col, Button, Row } from 'antd';
+import { CheckCircleFilled, CheckCircleOutlined } from '@ant-design/icons';
 import TaskStatus from 'js/enums/TaskStatus';
 
 interface Task {
@@ -13,46 +14,36 @@ interface Props {
   tasks: Task[] | undefined;
 }
 
+interface TaskItemProps {
+  data: Task;
+}
+
+const TaskItem = ({ data }: TaskItemProps) => {
+  const renderIcon = () => {
+    switch (data.status) {
+      case TaskStatus.data.OPEN:
+        return <CheckCircleFilled />;
+      case TaskStatus.data.DONE:
+        return <CheckCircleOutlined />;
+      default:
+        return null;
+    }
+  };
+  return (
+    <Row>
+      {renderIcon()}
+      &nbsp;
+      <div>{data.content}</div>
+    </Row>
+  );
+};
+
 const TaskList = ({ isLoading, tasks }: Props) => {
-  const columns = [
-    {
-      title: 'Title',
-      dataIndex: 'title',
-    },
-    {
-      title: 'Content',
-      dataIndex: 'content',
-    },
-    {
-      title: 'Status',
-      dataIndex: 'status',
-      render: (status: number) => {
-        const color = status === TaskStatus.getValue('OPEN') ? 'volcano' : 'green';
-        return (
-          <Tag color={color} key={status}>
-            {TaskStatus.getTitle(status)}
-          </Tag>
-        );
-      },
-    },
-
-    {
-      title: 'Actions',
-      render: () => {
-        return (
-          <>
-            <Button>Edit</Button>
-            &nbsp;
-            <Button>Remove</Button>
-          </>
-        );
-      },
-    },
-  ];
-
   return (
     <div>
-      <Table rowKey="id" dataSource={tasks || []} columns={columns} pagination={false} loading={isLoading} />
+      {tasks?.map((task) => (
+        <TaskItem data={task} />
+      ))}
     </div>
   );
 };
