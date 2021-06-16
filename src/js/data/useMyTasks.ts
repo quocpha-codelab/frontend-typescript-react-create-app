@@ -2,8 +2,7 @@ import { useQuery } from 'react-query';
 import { api } from '../helpers/api';
 
 interface GetTaskParams {
-  skip: number;
-  take: number;
+  date: string;
 }
 
 const useMyTasks = (params: GetTaskParams) =>

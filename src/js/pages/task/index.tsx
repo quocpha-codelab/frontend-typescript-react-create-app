@@ -1,44 +1,51 @@
 import { useState } from 'react';
-import { Pagination, Button, Row } from 'antd';
+import { Button, Row, Space } from 'antd';
+import { LeftOutlined, RightOutlined } from '@ant-design/icons';
+
+import dayjs from 'dayjs';
 
 import styles from './styles.module.scss';
 
 import TaskList from 'js/components/task/TaskList';
 import AddTask from 'js/components/task/AddTask';
 import useMyTasks from 'js/data/useMyTasks';
-
-const TASK_PER_PAGE = 10;
+import { CURRENT_DATE, formatDate } from 'js/helpers/date';
 
 const Tasks = () => {
-  const [skip, setSkip] = useState<number>(0);
+  const [date, setDate] = useState<string>(CURRENT_DATE);
+  const { data, isFetching, refetch, isError } = useMyTasks({ date: formatDate(date) });
 
-  const { data, isFetching, refetch, isError } = useMyTasks({ skip, take: TASK_PER_PAGE });
+  const previousDate = () => {
+    const previous = dayjs(date).add(-1, 'day');
 
-  const handlePageChange = (page: number): void => setSkip((page - 1) * TASK_PER_PAGE);
+    setDate(formatDate(previous));
+  };
+
+  const nextDate = () => {
+    const next = dayjs(date).add(1, 'day');
+
+    setDate(formatDate(next));
+  };
 
   return (
     <div className={styles.container}>
       <div className={styles.task_container}>
+        <Row justify="center">
+          <Space>
+            <LeftOutlined className="pointer" onClick={previousDate} />
+            <strong>{date === CURRENT_DATE ? 'Today' : date}</strong>
+            <RightOutlined className="pointer" onClick={nextDate} />
+          </Space>
+        </Row>
         <Row justify="space-between">
           <h2>List of Task</h2>
 
-          <Row>
-            <AddTask />
-            &nbsp;
-            <Button onClick={() => refetch()}>Reload</Button>
-          </Row>
+          <Button onClick={() => refetch()}>Reload</Button>
         </Row>
-
         {isError && <>Something error</>}
-        <TaskList isLoading={isFetching} tasks={data?.tasks} />
+        <AddTask date={date} />
 
-        <Pagination
-          total={data?.total}
-          pageSize={TASK_PER_PAGE}
-          onChange={handlePageChange}
-          showSizeChanger={false}
-          disabled={isFetching}
-        />
+        <TaskList tasks={data ? data.tasks : []} date={date} isLoading={isFetching} />
       </div>
     </div>
   );
