@@ -1,50 +1,112 @@
-import { Col, Button, Row } from 'antd';
-import { CheckCircleFilled, CheckCircleOutlined } from '@ant-design/icons';
-import TaskStatus from 'js/enums/TaskStatus';
+import { useMutation, useQueryClient } from 'react-query';
+import { useEffect, useState } from 'react';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { Row } from 'antd';
+import { VerticalAlignMiddleOutlined } from '@ant-design/icons';
+
+import TaskStyle from './Task.module.scss';
+
+import TaskItem from './TaskItem';
+import { showErrorMessage } from 'js/helpers/error';
+import { api } from 'js/helpers/api';
 
 interface Task {
   title: string;
   content: string;
   id: number;
   status: number;
+  tasks_rank: number;
 }
 
-interface Props {
+interface TaskListProps {
+  tasks: Task[];
+  date: string;
   isLoading: boolean;
-  tasks: Task[] | undefined;
 }
 
-interface TaskItemProps {
-  data: Task;
-}
+const TaskList = ({ isLoading, tasks: defaultTask, date }: TaskListProps) => {
+  const [tasks, setTasks] = useState<Task[]>(defaultTask);
+  const queryClient = useQueryClient();
 
-const TaskItem = ({ data }: TaskItemProps) => {
-  const renderIcon = () => {
-    switch (data.status) {
-      case TaskStatus.data.OPEN:
-        return <CheckCircleFilled />;
-      case TaskStatus.data.DONE:
-        return <CheckCircleOutlined />;
-      default:
-        return null;
-    }
-  };
-  return (
-    <Row>
-      {renderIcon()}
-      &nbsp;
-      <div>{data.content}</div>
-    </Row>
+  const { mutate: updateTask, isLoading: loadingUpdate } = useMutation(
+    async (data: any) => {
+      const res = await api.put(`/tasks/${data.id}/rank`, {
+        rank: data.rank,
+      });
+      return res.data;
+    },
+    {
+      onError: (error): void => {
+        showErrorMessage(error);
+        setTasks(defaultTask);
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries(['my-task', { date }]);
+      },
+    },
   );
-};
 
-const TaskList = ({ isLoading, tasks }: Props) => {
+  useEffect(() => {
+    setTasks([...defaultTask]);
+  }, [defaultTask]);
+
+  const handleUpdateTask = (startIndex: number, endIndex: number): void => {
+    const newTasks = [...tasks];
+    const [taskMoving] = newTasks.splice(startIndex, 1);
+
+    // update task when local state change for better UI
+    const taskId = taskMoving.id;
+    const newRank = newTasks[endIndex - 1] ? newTasks[endIndex - 1].tasks_rank : newTasks[endIndex].tasks_rank + 1;
+    updateTask({ id: taskId, rank: newRank });
+
+    // re order local task immediately
+    newTasks.splice(endIndex, 0, taskMoving);
+    setTasks(newTasks);
+  };
+
+  const onDragEnd = (result: any): void => {
+    if (!result.destination || result.source.index === result.destination.index) {
+      return;
+    }
+
+    handleUpdateTask(result.source.index, result.destination.index);
+  };
+
   return (
-    <div>
-      {tasks?.map((task) => (
-        <TaskItem data={task} />
-      ))}
-    </div>
+    <DragDropContext onDragEnd={onDragEnd}>
+      <Droppable droppableId="droppable">
+        {(provided) => (
+          <div ref={provided.innerRef} {...provided.droppableProps}>
+            {tasks.map((task, index) => (
+              <Draggable
+                key={task.id}
+                draggableId={String(task.id)}
+                index={index}
+                isDragDisabled={isLoading || loadingUpdate}
+              >
+                {(provided, snapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    style={provided.draggableProps.style}
+                    {...provided.draggableProps}
+                    className="mb-1"
+                  >
+                    <Row className="flex-1" align="middle">
+                      <div {...provided.dragHandleProps} className={TaskStyle.move_item}>
+                        <VerticalAlignMiddleOutlined />
+                      </div>
+                      &nbsp;
+                      <TaskItem data={task} isDragging={snapshot.isDragging} id={task.id} />
+                    </Row>
+                  </div>
+                )}
+              </Draggable>
+            ))}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
+    </DragDropContext>
   );
 };
 

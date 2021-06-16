@@ -1,61 +1,48 @@
-import { useState } from 'react';
-import { Modal, Button, Form, Input } from 'antd';
+import { Form, Input } from 'antd';
 import { useMutation, useQueryClient } from 'react-query';
+
 import { api } from 'js/helpers/api';
 import { showErrorMessage } from 'js/helpers/error';
 
-const AddTask = () => {
+interface Props {
+  date: string;
+}
+
+const AddTask = ({ date }: Props) => {
   const queryClient = useQueryClient();
   const [form] = Form.useForm();
 
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-
   const { mutate: addTask } = useMutation(
-    async (data) => {
-      const res = await api.post('/tasks', data);
+    async (data: any) => {
+      const res = await api.post('/tasks', {
+        content: data.content,
+        date,
+      });
       return res.data;
     },
     {
-      onError: (error) => {
+      onError: (error): void => {
         showErrorMessage(error);
       },
-      onSuccess: () => {
+      onSuccess: (): void => {
         queryClient.invalidateQueries('my-task');
         form.resetFields();
-        handleClose();
       },
     },
   );
 
-  const handleClose = () => {
-    setIsModalVisible(false);
-  };
-
-  const handleOpen = () => {
-    setIsModalVisible(true);
-  };
-
-  const formLayout = {
-    labelCol: { span: 6 },
-    wrapperCol: { span: 18 },
-  };
-
   return (
-    <>
-      <Button onClick={handleOpen}>New</Button>
-
-      <Modal title="New Task" visible={isModalVisible} onOk={() => form.submit()} onCancel={handleClose} okText="Add">
-        <Form {...formLayout} form={form} onFinish={addTask}>
-          <Form.Item name="title" label="Title" rules={[{ required: true, min: 2, max: 63 }]}>
-            <Input />
-          </Form.Item>
-
-          <Form.Item name="content" label="Content" rules={[{ required: true, min: 2, max: 255 }]}>
-            <Input />
-          </Form.Item>
-        </Form>
-      </Modal>
-    </>
+    <Form form={form} onFinish={addTask}>
+      <Form.Item
+        name="content"
+        rules={[
+          { required: true, message: 'This field is required!' },
+          { min: 2, max: 255 },
+        ]}
+      >
+        <Input placeholder="new task" />
+      </Form.Item>
+    </Form>
   );
 };
 
