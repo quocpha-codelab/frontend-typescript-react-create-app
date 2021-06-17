@@ -11,11 +11,10 @@ import { showErrorMessage } from 'js/helpers/error';
 import { api } from 'js/helpers/api';
 
 interface Task {
-  title: string;
   content: string;
   id: number;
   status: number;
-  tasks_rank: number;
+  position: number;
 }
 
 interface TaskListProps {
@@ -30,8 +29,8 @@ const TaskList = ({ isLoading, tasks: defaultTask, date }: TaskListProps) => {
 
   const { mutate: updateTask, isLoading: loadingUpdate } = useMutation(
     async (data: any) => {
-      const res = await api.put(`/tasks/${data.id}/rank`, {
-        rank: data.rank,
+      const res = await api.put(`/tasks/${data.id}/position`, {
+        position: data.position,
       });
       return res.data;
     },
@@ -56,8 +55,8 @@ const TaskList = ({ isLoading, tasks: defaultTask, date }: TaskListProps) => {
 
     // update task when local state change for better UI
     const taskId = taskMoving.id;
-    const newRank = newTasks[endIndex - 1] ? newTasks[endIndex - 1].tasks_rank : newTasks[endIndex].tasks_rank + 1;
-    updateTask({ id: taskId, rank: newRank });
+    const newPosition = newTasks[endIndex - 1] ? newTasks[endIndex - 1].position : newTasks[endIndex].position + 1;
+    updateTask({ id: taskId, position: newPosition });
 
     // re order local task immediately
     newTasks.splice(endIndex, 0, taskMoving);

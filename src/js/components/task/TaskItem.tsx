@@ -10,7 +10,6 @@ import { showErrorMessage } from 'js/helpers/error';
 import { api } from 'js/helpers/api';
 
 interface Task {
-  title: string;
   content: string;
   id: number;
   status: number;
