@@ -21,7 +21,7 @@ export default function SignIn() {
       onSuccess: (res) => {
         if (res.accessToken) {
           setToken(res.accessToken);
-          history.push('/');
+          history.push('/tasks');
         }
       },
       onError: (error) => {

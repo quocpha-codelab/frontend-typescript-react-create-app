@@ -1,18 +1,20 @@
 import { useEffect, useState, useRef } from 'react';
 import { useMutation } from 'react-query';
 import { Row, Input, Form } from 'antd';
-import { CheckCircleFilled, CheckCircleOutlined } from '@ant-design/icons';
 
 import TaskStyle from './Task.module.scss';
 
-import TaskStatus from 'js/enums/TaskStatus';
 import { showErrorMessage } from 'js/helpers/error';
 import { api } from 'js/helpers/api';
+import UpdateTaskStatus from './UpdateTaskStatus';
+import RemoveTask from './RemoveTask';
+import UpdateTaskDate from './UpdateTaskDate';
 
 interface Task {
   content: string;
   id: number;
   status: number;
+  date: string;
 }
 
 interface TaskItemProps {
@@ -57,17 +59,6 @@ const TaskItem = ({ data, isDragging, id }: TaskItemProps) => {
     updateTask(data);
   };
 
-  const renderIcon = () => {
-    switch (data.status) {
-      case TaskStatus.data.OPEN:
-        return <CheckCircleFilled />;
-      case TaskStatus.data.DONE:
-        return <CheckCircleOutlined />;
-      default:
-        return null;
-    }
-  };
-
   return (
     <>
       <Row
@@ -75,7 +66,7 @@ const TaskItem = ({ data, isDragging, id }: TaskItemProps) => {
         className={TaskStyle.task_item}
         style={{ backgroundColor: isDragging ? 'aqua' : 'lightgrey' }}
       >
-        {renderIcon()}
+        <UpdateTaskStatus taskId={data.id} status={data.status} />
         &nbsp;
         <Row onClick={handleOpenEditContent} align="middle" className="flex-1">
           {isEdit ? (
@@ -106,6 +97,9 @@ const TaskItem = ({ data, isDragging, id }: TaskItemProps) => {
             content
           )}
         </Row>
+        &nbsp;
+        <RemoveTask taskId={data.id} />
+        <UpdateTaskDate taskId={data.id} date={data.date} />
       </Row>
     </>
   );

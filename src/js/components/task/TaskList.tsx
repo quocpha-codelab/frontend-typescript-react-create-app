@@ -15,6 +15,7 @@ interface Task {
   id: number;
   status: number;
   position: number;
+  date: string;
 }
 
 interface TaskListProps {
