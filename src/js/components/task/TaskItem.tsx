@@ -34,7 +34,6 @@ const TaskItem = ({ data, isDragging, id }: TaskItemProps) => {
   const queryClient = useQueryClient();
 
   const [isEdit, setIsEdit] = useState<boolean>(false);
-  const [content, setContent] = useState<string>(data.content);
 
   const { mutate: updateTask, isLoading } = useMutation(
     async (data: UpdateTaskContentProps) => {
@@ -97,17 +96,11 @@ const TaskItem = ({ data, isDragging, id }: TaskItemProps) => {
                   { min: 2, max: 255 },
                 ]}
               >
-                <Input
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  ref={inputRef}
-                  disabled={isLoading}
-                  onBlur={() => form.submit()}
-                />
+                <Input ref={inputRef} disabled={isLoading} onBlur={() => form.submit()} />
               </Form.Item>
             </Form>
           ) : (
-            content
+            data.content
           )}
         </Row>
         &nbsp;
