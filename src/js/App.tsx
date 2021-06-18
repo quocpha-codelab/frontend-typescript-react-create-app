@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Switch, Route } from 'react-router-dom';
+import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ReactQueryDevtools } from 'react-query/devtools';
 import { ConfigProvider } from 'antd';
@@ -10,8 +10,6 @@ import { validateMessages } from './config/validate';
 
 import PrivateRoute from './PrivateRoute';
 import MainLayout from './components/layout/MainLayout';
-
-const Home = lazy(() => import('./pages/home'));
 
 const SignIn = lazy(() => import('./pages/auth/SignIn'));
 const SignUp = lazy(() => import('./pages/auth/SignUp'));
@@ -33,8 +31,10 @@ const ROUTE = (
         <Switch>
           <Route path="/sign-in" component={SignIn} />
           <Route path="/sign-up" component={SignUp} />
+          <Route exact path="/">
+            <Redirect to="/tasks" />
+          </Route>
 
-          <PrivateRoute exact path="/" component={Home} layout={MainLayout} />
           <PrivateRoute exact path="/tasks" component={Task} layout={MainLayout} />
         </Switch>
       </Suspense>

@@ -13,7 +13,7 @@ interface Props {
 const UpdateTaskStatus = ({ taskId, status }: Props) => {
   const queryClient = useQueryClient();
 
-  const { mutate: updateTaskStatus } = useMutation(
+  const { mutate: updateTaskStatus, isLoading } = useMutation(
     async () => {
       const res = await api.put(`/tasks/${taskId}/status`, {
         status: status === TaskStatus.data.OPEN ? TaskStatus.data.DONE : TaskStatus.data.OPEN,
@@ -33,9 +33,9 @@ const UpdateTaskStatus = ({ taskId, status }: Props) => {
   return (
     <>
       {status === TaskStatus.data.OPEN ? (
-        <CheckCircleOutlined onClick={() => updateTaskStatus()} />
+        <CheckCircleOutlined onClick={() => !isLoading && updateTaskStatus()} />
       ) : (
-        <CheckCircleFilled onClick={() => updateTaskStatus()} />
+        <CheckCircleFilled onClick={() => !isLoading && updateTaskStatus()} />
       )}
     </>
   );

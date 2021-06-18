@@ -46,8 +46,8 @@ const RemoveTask = ({ taskId }: RemoveTaskPrams) => {
   return (
     <>
       <DeleteOutlined type="primary" onClick={showModal} />
-      <Modal title="Basic Modal" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
-        <p>Are your sure to remove this task</p>
+      <Modal title="Remove Task" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
+        <p>Are your sure to remove this task?</p>
       </Modal>
     </>
   );

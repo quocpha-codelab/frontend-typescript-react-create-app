@@ -14,7 +14,7 @@ const MainLayout: React.FC = ({ children }) => {
   if (data) {
     return (
       <div className={LayoutStyle.container}>
-        <Header />
+        <Header me={data} />
         <div className={LayoutStyle.content}>{children}</div>
         <Footer />
       </div>
