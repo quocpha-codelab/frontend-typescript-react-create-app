@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { useMutation } from 'react-query';
+import { useMutation, useQueryClient } from 'react-query';
 import { Row, Input, Form } from 'antd';
 
 import TaskStyle from './Task.module.scss';
@@ -9,6 +9,7 @@ import { api } from 'js/helpers/api';
 import UpdateTaskStatus from './UpdateTaskStatus';
 import RemoveTask from './RemoveTask';
 import UpdateTaskDate from './UpdateTaskDate';
+import { formatDate } from 'js/helpers/date';
 
 interface Task {
   content: string;
@@ -23,15 +24,20 @@ interface TaskItemProps {
   id: number;
 }
 
+interface UpdateTaskContentProps {
+  content: string;
+}
+
 const TaskItem = ({ data, isDragging, id }: TaskItemProps) => {
   const [form] = Form.useForm();
   const inputRef = useRef<any>(null);
+  const queryClient = useQueryClient();
 
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [content, setContent] = useState<string>(data.content);
 
   const { mutate: updateTask, isLoading } = useMutation(
-    async (data) => {
+    async (data: UpdateTaskContentProps) => {
       const res = await api.put(`/tasks/${id}/content`, data);
       return res.data;
     },
@@ -54,9 +60,16 @@ const TaskItem = ({ data, isDragging, id }: TaskItemProps) => {
     setIsEdit(true);
   };
 
-  const handleUpdateTask = (data: any) => {
+  const handleUpdateTask = ({ content }: UpdateTaskContentProps) => {
     setIsEdit(false);
-    updateTask(data);
+    queryClient.setQueryData(['my-task', { date: formatDate(data.date) }], (oldData: any) => {
+      const newData = { ...oldData };
+      newData.tasks.forEach((task: Task) => {
+        if (task.id === data.id) task.content = content;
+      });
+      return newData;
+    });
+    updateTask({ content });
   };
 
   return (
